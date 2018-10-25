@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import LanguageCodeMapping, { MultiLingualData } from './MultilingualData';
+import LanguageCodeMapping, { MultiLingualData } from './data';
 import './styles.css';
 
 class MultilingualInput extends Component {
