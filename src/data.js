@@ -197,14 +197,13 @@ for (let i = 0; i < languageCodes.length; i++) {
 }
 
 export class MultiLingualData {
-    constructor(defaultLanguage, value = "") {
+    constructor(defaultLanguage, value = '') {
         this.defaultLanguage = defaultLanguage;
         this.values = new Map(); //[{ code: this.defaultLanguage, value: '' }];
         this.values.set(defaultLanguage, value);
     }
-};
+}
 
 export const defaultMultiLingualData = new MultiLingualData('fa');
 
 export default LanguageCodeMapping;
-

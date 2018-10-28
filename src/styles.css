@@ -35,25 +35,39 @@
 .multilingual_modal select {
     width: 300px;    
     margin: 0px 5px 0px 0px;
+    border-radius: 3px;
+}
+
+.multilingual_modal_table {
+    padding: 0px;
+}
+
+.multilingual_modal_table caption {    
+    font-size: large;
+    color: rgb(15, 16, 36);
+    text-align: left;
+    font-weight: 400; 
+    padding: 0px 0px 0px 5px;       
 }
 
 .multilingual_container{
-    width: 450px;
+    background: transparent;
 }
 
-.multilingual_container td{
+.multilingual_container td {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: medium;
     font-weight: bold;
-    text-align: left;
+    text-align: right;
+    padding: 0px 3px 0px 3px;
 }
 .multilingual_container input[type=button]{
     border-radius: 3px;
     border: 1px solid #c3c3c3;
     font-size: medium;
+    min-width: 25px;
 }
 .multilingual_container input[type=text]{
-    width: 300px;
     border-radius: 3px;
     border: 1px solid #c3c3c3;
     font-size: medium;
