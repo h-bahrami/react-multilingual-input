@@ -199,7 +199,7 @@ for (let i = 0; i < languageCodes.length; i++) {
 export class MultiLingualData {
     constructor(defaultLanguage, value = '') {
         this.defaultLanguage = defaultLanguage;
-        this.values = new Map(); //[{ code: this.defaultLanguage, value: '' }];
+        this.values = new Map();
         this.values.set(defaultLanguage, value);
     }
 }

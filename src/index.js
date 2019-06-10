@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-// import ReactDOM from 'react-dom';
-import propTypes from 'prop-types';
+import PropTypes from 'prop-types';
 import LanguageCodeMapping, { MultiLingualData } from './data';
 import './styles.css';
 
@@ -42,8 +41,8 @@ export default class MultilingualInput extends Component {
     }
 
     onTextChange(key, value) {
-        const { onInputChange } = this.props;
-        onInputChange(key, value);
+        const { onChange } = this.props;
+        onChange(key, value);
     }
 
     onCopy(e) {
@@ -61,8 +60,8 @@ export default class MultilingualInput extends Component {
             e.preventDefault();
             const addToExisting = window.confirm('Do you want to add the values to the existing ones?');
 
-            const { mldata } = this.props;
-            const model = Object.assign({}, mldata);
+            const { data } = this.props;
+            const model = Object.assign({}, data);
             // eslint-disable-next-line
             const regex = new RegExp(/([a-zA-Z-]+)[\x09|\s]+(.+)[\r|\n|\r\n]/g);
             let match = regex.exec(d);
@@ -73,16 +72,16 @@ export default class MultilingualInput extends Component {
                 model.values[key] = (addToExisting && model.values[key] !== undefined ? `${model.values[key]} ${value}` : value);
                 match = regex.exec(d);
             }
-            const { onBatchUpdate } = this.props;
-            onBatchUpdate(model);
+            const { onAllChange } = this.props;
+            onAllChange(model);
         }
     }
 
     getExcelStyleTextFromData() {
         let text = '';
-        const { mldata } = this.props;
-        Object.keys(mldata.values).forEach((key) => {
-            text += `${key}${String.fromCharCode(9)}${mldata.values[key]}\n`;
+        const { data } = this.props;
+        Object.keys(data.values).forEach((key) => {
+            text += `${key}${String.fromCharCode(9)}${data.values[key]}\n`;
         });
         return text;
     }
@@ -99,9 +98,9 @@ export default class MultilingualInput extends Component {
     }
 
     generateInputs() {
-        const { mldata } = this.props;
-        const { defaultLanguage } = mldata;
-        const defaultValue = mldata.values.get(mldata.defaultLanguage);
+        const { data } = this.props;
+        const { defaultLanguage } = data;
+        const defaultValue = data.values.get(defaultLanguage);
         const inputs = [];
         inputs.push(<tr key={`tr_${defaultLanguage}`}>
             <td key="td_0" style={{ minWidth: "150px" }}>{`${LanguageCodeMapping.get(defaultLanguage)} (${defaultLanguage.toUpperCase()})`}</td>
@@ -109,7 +108,7 @@ export default class MultilingualInput extends Component {
             <td key="td_2"><input type="button" value="+" onClick={() => this.setModalVisibility(true)} /></td>
         </tr>);
         const { stayExpanded } = this.state;
-        mldata.values.forEach((value, key) => {
+        data.values.forEach((value, key) => {
             if (key !== defaultLanguage && stayExpanded) {
                 inputs.push(<tr key={`tr_${key}`}>
                     <td key="td_0">{`${LanguageCodeMapping.get(key)} (${key.toUpperCase()})`}</td>
@@ -188,16 +187,17 @@ export default class MultilingualInput extends Component {
 
 
 MultilingualInput.propTypes = {
-    mldata: MultiLingualData,
-    onInputChange: propTypes.func,
-    onBatchUpdate: propTypes.func,
-    onDelete: propTypes.func,
-    style: propTypes.style,
+    data: PropTypes.instanceOf(MultiLingualData),
+    onChange: PropTypes.func.isRequired,
+    onAllChange: PropTypes.func,
+    onDelete: PropTypes.func.isRequired,
+    style: PropTypes.style,    
 };
 
 MultilingualInput.defaultProps = {
-    mldata: new MultiLingualData('fa'),
-    onInputChange: () => console.log('::: onInputChange function is not connected :::'),
-    onBatchUpdate: () => console.log('::: onBatchUpdate function is not connected :::'),
+    data: new MultiLingualData('fa'),
+    onChange: () => console.log('onChange function is not connected.'),
+    onAllChange: () => console.log('onAllChange function is not connected.'),
+    onDelete: () => console.log('onDelete function is not connected.'),
     style: { width: '500px;' }
 };
