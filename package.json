@@ -1,20 +1,26 @@
 {
   "name": "react-multilingual-input",
   "version": "1.0.0",
-  "description": "Multilingual react input component.",
+  "description": "A simple but handy multilingual react input component.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/h-bahrami/react-multilingual-input"
+  },
   "main": "build/index.js",
   "dependencies": {
+    "prop-types": "^15.7.2",
     "react": "16.5.2",
     "webpack": "4.22.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack --watch",
-    "build": "webpack --mode development"
+    "build": "webpack --mode production"
   },
   "author": {
-    "name": "h-bahrami",
-    "email": "h.bahrami@live.com"
+    "name": "a.bahram",
+    "email": "areff.hb@gmail.com"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",

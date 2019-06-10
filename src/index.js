@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import LanguageCodeMapping, { MultiLingualData } from './data';
 import './styles.css';
 
-class MultilingualInput extends Component {
+export default class MultilingualInput extends Component {
     constructor(props) {
         super(props);
         this.keepExpanded = false;
@@ -14,13 +14,15 @@ class MultilingualInput extends Component {
         };
         this.handleModalCancel = this.handleModalCancel.bind(this);
         this.handleModalOk = this.handleModalOk.bind(this);
+
+        this.modalRef = React.createRef();
         this.setModalVisibility = (visible = true) => {
-            document.getElementById('multilingual_modal_input').style.display = visible ? 'block' : 'none';
-        };
+            this.modalRef.current.style.display = visible ? 'block' : 'none';
+        }
         this.generateLanguageOptions = () => {
             const children = [];
             LanguageCodeMapping.forEach((value, key) => {
-                children.push(<option value={key}>{value}</option>);
+                children.push(<option key={`option_${key}`} value={key}>{value}</option>);
             });
             return children;
         };
@@ -39,8 +41,8 @@ class MultilingualInput extends Component {
     }
 
     onTextChange(key, value) {
-        const { onInputChange } = this.props;
-        onInputChange(key, value);
+        const { onChange } = this.props;
+        onChange(key, value);
     }
 
     onCopy(e) {
@@ -56,11 +58,11 @@ class MultilingualInput extends Component {
         const d = e.clipboardData.getData('text');
         if (this.newRegex().test(d)) {
             e.preventDefault();
-            const addToExisting = confirm('Do you want to add the values to the existing ones?');
+            const addToExisting = window.confirm('Do you want to add the values to the existing ones?');
 
-            const { mldata } = this.props;
-            const model = Object.assign({}, mldata);
-
+            const { data } = this.props;
+            const model = Object.assign({}, data);
+            // eslint-disable-next-line
             const regex = new RegExp(/([a-zA-Z-]+)[\x09|\s]+(.+)[\r|\n|\r\n]/g);
             let match = regex.exec(d);
             while (match) {
@@ -70,16 +72,16 @@ class MultilingualInput extends Component {
                 model.values[key] = (addToExisting && model.values[key] !== undefined ? `${model.values[key]} ${value}` : value);
                 match = regex.exec(d);
             }
-            const { onBatchUpdate } = this.props;
-            onBatchUpdate(model);
+            const { onAllChange } = this.props;
+            onAllChange(model);
         }
     }
 
     getExcelStyleTextFromData() {
         let text = '';
-        const { mldata } = this.props;
-        Object.keys(mldata.values).forEach((key) => {
-            text += `${key}${String.fromCharCode(9)}${mldata.values[key]}\n`;
+        const { data } = this.props;
+        Object.keys(data.values).forEach((key) => {
+            text += `${key}${String.fromCharCode(9)}${data.values[key]}\n`;
         });
         return text;
     }
@@ -96,22 +98,22 @@ class MultilingualInput extends Component {
     }
 
     generateInputs() {
-        const { mldata } = this.props;
-        const { defaultLanguage } = mldata;
-        const defaultValue = mldata.values.get(mldata.defaultLanguage);
+        const { data } = this.props;
+        const { defaultLanguage } = data;
+        const defaultValue = data.values.get(defaultLanguage);
         const inputs = [];
-        inputs.push(<tr>
-            <td>{`${LanguageCodeMapping.get(defaultLanguage)} (${defaultLanguage.toUpperCase()})`}</td>
-            <td>{this.generateInput(defaultLanguage, defaultValue)}</td>
-            <td><input type="button" value="+" onClick={this.setModalVisibility(true)} /></td>
+        inputs.push(<tr key={`tr_${defaultLanguage}`}>
+            <td key="td_0" style={{ minWidth: "150px" }}>{`${LanguageCodeMapping.get(defaultLanguage)} (${defaultLanguage.toUpperCase()})`}</td>
+            <td key="td_1">{this.generateInput(defaultLanguage, defaultValue)}</td>
+            <td key="td_2"><input type="button" value="+" onClick={() => this.setModalVisibility(true)} /></td>
         </tr>);
         const { stayExpanded } = this.state;
-        mldata.values.forEach((value, key) => {
+        data.values.forEach((value, key) => {
             if (key !== defaultLanguage && stayExpanded) {
-                inputs.push(<tr>
-                    <td>{`${LanguageCodeMapping.get(key)} (${key.toUpperCase()})`}</td>
-                    <td>{this.generateInput(key, value)}</td>
-                    <td></td>
+                inputs.push(<tr key={`tr_${key}`}>
+                    <td key="td_0">{`${LanguageCodeMapping.get(key)} (${key.toUpperCase()})`}</td>
+                    <td key="td_1">{this.generateInput(key, value)}</td>
+                    <td key="td_2"><input type="button" value="-" onClick={() => this.props.onDelete(key)} /></td>
                 </tr>);
             }
         });
@@ -122,7 +124,7 @@ class MultilingualInput extends Component {
         return (
             <input
                 type="text"
-                id={`in_${key}`}
+                id={`input_${key}`}
                 value={value}
                 readOnly={this.props.readOnly}
                 minLength={this.props.minLength || 0}
@@ -143,30 +145,39 @@ class MultilingualInput extends Component {
 
     render() {
         return (
-            <div className="multilingual_container" key={this.props.id}>
+            <div className="multilingual_container" key={this.props.id} style={this.props.style}>
                 <table key="table">
-                    <tbody>
+                    <tbody key="table_body">
                         {this.generateInputs()}
                     </tbody>
                 </table>
-                <div key="modal" id="multilingual_modal_input" className="multilingual_modal">
+                <div key="multilingual_modal_input" className="multilingual_modal" ref={this.modalRef}>
                     <div className="multilingual_modal-content">
-                        <span>Add New Value (langauge specific)</span>
-                        <select onChange={(val) => this.setState({ newlang: val.target.value })}>
-                            {this.generateLanguageOptions()}
-                        </select>
-
-                        <br />
-
-                        <input type="text" onChange={(e) => this.setState({ newtranslation: e.target.value })} />
-
-                        <br /><br />
-
-                        <input type="button" key="back" onClick={this.handleModalCancel} value="Cancel"
-                            style={{ float: "right", marginLeft: "3px" }} />
-                        <input type="button" key="submit" onClick={this.handleModalOk} value="Submit"
-                            style={{ float: "right", marginLeft: "3px" }} />
-                        <br />
+                        <table className="multilingual_modal_table">
+                            <caption>
+                                Add New Value (langauge specific)
+                            </caption>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <select key="model_lang" onChange={(val) => this.setState({ newlang: val.target.value })}>
+                                            {this.generateLanguageOptions()}
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <input key="model_val" type="text" onChange={(e) => this.setState({ newtranslation: e.target.value })} />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style={{paddingTop: "15px"}}><input type="button" key="back" onClick={this.handleModalCancel} value="Cancel"
+                                        style={{ float: "right", marginLeft: "3px" }} />
+                                    <input type="button" key="submit" onClick={this.handleModalOk} value="Submit"
+                                            style={{ float: "right", marginLeft: "3px" }} /></td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -176,15 +187,17 @@ class MultilingualInput extends Component {
 
 
 MultilingualInput.propTypes = {
-    mldata: MultiLingualData,
-    onInputChange: PropTypes.func,
-    onBatchUpdate: PropTypes.func
+    data: PropTypes.instanceOf(MultiLingualData),
+    onChange: PropTypes.func.isRequired,
+    onAllChange: PropTypes.func,
+    onDelete: PropTypes.func.isRequired,
+    style: PropTypes.style,    
 };
 
 MultilingualInput.defaultProps = {
-    mldata: new MultiLingualData('fa'),
-    onInputChange: null,
-    onBatchUpdate: null
+    data: new MultiLingualData('fa'),
+    onChange: () => console.log('onChange function is not connected.'),
+    onAllChange: () => console.log('onAllChange function is not connected.'),
+    onDelete: () => console.log('onDelete function is not connected.'),
+    style: { width: '500px;' }
 };
-
-export default MultilingualInput;
